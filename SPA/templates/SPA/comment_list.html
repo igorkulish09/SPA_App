@@ -1,9 +1,13 @@
 {% for comment in comments %}
-    {{ comment.user_name }} - {{ comment.created_at }}<br>
-    {{ comment.text }}<br>
-    <a href="{% url 'add_comment' comment.id %}">Reply</a>
-    <hr>
+    <div class="comment">
+        {{ comment.user_name }} - {{ comment.created_at }}<br>
+        {{ comment.text }}<br>
+        <a href="{% url 'add_reply' parent_comment_id=comment.id %}">Ответить</a>
+        <hr>
+    </div>
 {% endfor %}
+
+<a href="{% url 'add_comment' %}">Add comment</a>
 
 <div class="pagination">
     <span class="step-links">

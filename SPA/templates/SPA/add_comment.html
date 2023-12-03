@@ -1,6 +1,7 @@
 <h2>Leave a comment</h2>
-<form method="post" action="{% url 'add_comment' parent_comment.id %}">
+<form method="post" action="{% if parent_comment %}{% url 'add_reply' parent_comment.id %}{% else %}{% url 'add_comment' %}{% endif %}">
     {% csrf_token %}
     {{ form.as_p }}
+    {{ form.captcha }}
     <input type="submit" value="Submit">
 </form>

@@ -1,7 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Comment
 from .forms import CommentForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from PIL import Image
+import os
 
 
 def comment_list(request):
@@ -29,7 +31,52 @@ def add_comment(request, parent_comment_id=None):
             comment = form.save(commit=False)
             comment.parent_comment = parent_comment
             comment.save()
+            return redirect('comment_list')
     else:
         form = CommentForm()
 
-    return render(request, 'SPA/add_comment.html', {'form': form, 'parent_comment': parent_comment})
+    return render(request, 'SPA/add_comment.html', {'form': form})
+    # return render(request, 'SPA/add_comment.html', {'form': form, 'parent_comment': parent_comment})
+
+
+from django.http import JsonResponse
+
+def upload_file_view(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES['file']
+
+        # Перевірка типу файлу (зображення)
+        if not uploaded_file.content_type.startswith('image'):
+            return JsonResponse({'error': 'File type not supported'}, status=400)
+
+        # Визначення шляху для збереження файлу
+        save_path = 'path/to/save/'
+
+        # Якщо папка не існує, створити її
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+        # Складання шляху для збереження файлу
+        file_path = os.path.join(save_path, uploaded_file.name)
+
+        # Отримання розширення файлу
+        _, file_extension = os.path.splitext(uploaded_file.name)
+
+        # Збереження файлу
+        with open(file_path, 'wb') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # Якщо це зображення та його розміри перевищують 320x240, зменшіть його
+        if file_extension.lower() in ['.jpg', '.jpeg', '.png', '.gif']:
+            image = Image.open(file_path)
+            max_size = (320, 240)
+            image.thumbnail(max_size)
+            image.save(file_path)
+
+        # Тут можна повернути URL або іншу інформацію про збережений файл
+        file_url = f'/media/{uploaded_file.name}'
+        return JsonResponse({'file_url': file_url})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
