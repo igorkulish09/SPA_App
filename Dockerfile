@@ -16,7 +16,7 @@ COPY . /app/
 
 # Запускаємо міграції та створюємо суперпользователя
 RUN python manage.py migrate
-RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')" | python manage.py shell
+RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin3', 'admin3@example.com', 'admin')" | python manage.py shell
 
 # Відкриваємо порт для зовнішніх з'єднань
 EXPOSE 8000
